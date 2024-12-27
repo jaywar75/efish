@@ -1,0 +1,62 @@
+/* app/static/css/styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #35424a;
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+}
+
+nav a {
+    color: #ffffff;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+main {
+    padding: 20px;
+}
+
+.flash {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.flash.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.flash.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.error {
+    color: red;
+    font-size: 0.9em;
+}
+
+footer {
+    background-color: #35424a;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
