@@ -9,9 +9,9 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         <p>
-            {{ form.email.label }}<br>
-            {{ form.email(size=32) }}<br>
-            {% for error in form.email.errors %}
+            {{ form.username.label }}<br>
+            {{ form.username(size=32) }}<br>
+            {% for error in form.username.errors %}
                 <span class="error">{{ error }}</span>
             {% endfor %}
         </p>
@@ -27,4 +27,5 @@
         </p>
         <p>{{ form.submit() }}</p>
     </form>
+    <p><a href="{{ url_for('main.home') }}">Back to Home</a></p>
 {% endblock %}

@@ -1,0 +1,84 @@
+<!-- app/tasks/templates/tasks/list_tasks.html -->
+{% extends 'base.html' %}
+
+{% block title %}Your Tasks - Efish{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Your Tasks</h2>
+    <!-- Add Task Button -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ url_for('tasks.add_task') }}" class="btn btn-action add-task-btn"
+           data-bs-toggle="tooltip"
+           data-bs-placement="top"
+           title="Add New Task"
+           aria-label="Add New Task">
+             <i class="bi bi-plus-lg"></i>
+        </a>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" style="width: 120px;">Actions</th> <!-- Adjusted width for icons -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <th scope="row" data-label="#">{{ loop.index + (pagination.per_page * (pagination.page - 1)) }}</th>
+                        <td data-label="Title">{{ task.title }}</td>
+                        <td data-label="Description">{{ task.description }}</td>
+                        <td data-label="Status">
+                            {% if task.completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Actions">
+                            <div class="d-flex align-items-center">
+                                <!-- Edit Button -->
+                                <a href="{{ url_for('tasks.edit_task', task_id=task._id) }}"
+                                   class="btn btn-action edit-btn me-2"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="Edit Task"
+                                   aria-label="Edit Task">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <!-- Delete Button -->
+                                <form action="{{ url_for('tasks.delete_task', task_id=task._id) }}" method="POST" class="d-inline">
+                                    <!-- CSRF token can be added here in the future -->
+                                    <button type="submit" class="btn btn-action delete-btn"
+                                            onclick="return confirm('Are you sure you want to delete this task?');"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="Delete Task"
+                                            aria-label="Delete Task">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No tasks found. <a href="{{ url_for('tasks.add_task') }}">Add a new task</a>.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center">
+        {{ pagination.links }}
+    </div>
+{% endblock %}
