@@ -12,8 +12,28 @@ from datetime import datetime
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
+@login_required
 def home():
-    return render_template('home.html')
+    """
+        Home route displaying the dashboard with the total number of tasks
+        and the five most recent tasks for the current user.
+        """
+    # Fetch the total number of tasks for the current user
+    total_tasks = mongo.db.tasks.count_documents({'user_id': current_user.id})
+
+    # Fetch the five most recent tasks, sorted by creation date in descending order
+    recent_tasks = list(
+        mongo.db.tasks.find({'user_id': current_user.id})
+                        .sort('created_at', -1)
+                        .limit(5)
+    )
+
+    # Optional: Convert 'created_at' to a Python datetime object if it's not already
+    for task in recent_tasks:
+        if isinstance(task.get('created_at'), str):
+            task['created_at'] = datetime.strptime(task['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+
+    return render_template('home.html', total_tasks=total_tasks, recent_tasks=recent_tasks)
 
 @main_bp.route('/login', methods=['GET', 'POST'])
 def login():

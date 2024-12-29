@@ -7,7 +7,7 @@ from . import tasks_bp
 from flask_paginate import Pagination, get_page_parameter
 from .forms import TaskForm
 from .. import mongo
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @tasks_bp.route('/tasks', methods=['GET'])
@@ -33,7 +33,7 @@ def add_task():
             'title': form.title.data,
             'description': form.description.data,
             'completed': False,
-            'created_at': datetime.utcnow()  # Add creation timestamp
+            'created_at': datetime.now(timezone.utc)  # Add creation timestamp
         })
         flash('Task added successfully!', 'success')
         return redirect(url_for('tasks.list_tasks'))

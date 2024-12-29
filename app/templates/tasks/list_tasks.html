@@ -1,22 +1,23 @@
 <!-- app/tasks/templates/tasks/list_tasks.html -->
 {% extends 'base.html' %}
 
-{% block title %}Your Tasks - Efish{% endblock %}
+{% block title %}Your Tasks - efish{% endblock %}
 
 {% block content %}
     <h2 class="mb-4">Your Tasks</h2>
+
     <!-- Add Task Button -->
     <div class="d-flex justify-content-end mb-3">
-        <a href="{{ url_for('tasks.add_task') }}" class="btn btn-action add-task-btn"
+        <a href="{{ url_for('tasks.add_task') }}" class="btn-add-task"
            data-bs-toggle="tooltip"
            data-bs-placement="top"
            title="Add New Task"
            aria-label="Add New Task">
-             <i class="bi bi-plus-lg"></i>
+             <i class="bi bi-plus-lg me-2"></i> Add Task
         </a>
     </div>
 
-
+    <!-- Tasks Table -->
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table-dark">

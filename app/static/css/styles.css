@@ -1,689 +1,289 @@
-/* styles.css */
+/* app/static/css/styles.css */
 
 /* ============================= */
 /*         CSS Variables         */
 /* ============================= */
 
-/* Light Theme Variables */
-:root {
-    /* ========================= */
-    /*          Typography       */
-    /* ========================= */
-    --font-family-base: 'Roboto', sans-serif;
-    --font-family-headings: 'Open Sans', sans-serif;
-    --font-size-base: 16px;
-    --line-height-base: 1.6;
+/* Light Mode Variables */
+.light-mode {
+    --background-color: #f8f9fa;
+    --text-color: #212529;
+    --navbar-bg: #ffffff;
+    --navbar-text: #212529;
+    --card-bg: #ffffff;
+    --card-text: #212529;
+    --link-color: #0d6efd;
+    --link-hover-color: #0a58ca;
+    --badge-bg: #6c757d;
+    --footer-bg: #f1f3f5;
+    --footer-text: #6c757d;
+    --shadow-depth: rgba(0, 0, 0, 0.1);
+    --shadow-width: 0.25rem;
+    --shadow-height: 0.25rem;
+    /* Add Task Button Variables */
+    --btn-add-bg: #494c49; /* Green */
+    --btn-add-text: #ffffff; /* White */
+    --btn-add-border: #122c3a;
+    --btn-add-hover-bg: #24b544; /* Darker Green */
+    --btn-add-hover-text: #df15d4;
+}
 
-    /* ========================= */
-    /*            Colors         */
-    /* ========================= */
+/* Dark Mode Variables */
+.dark-mode {
+    --background-color: #212529;
+    --text-color: #f8f9fa;
+    --navbar-bg: #343a40;
+    --navbar-text: #f8f9fa;
+    --card-bg: #343a40;
+    --card-text: #f8f9fa;
+    --link-color: #0d6efd;
+    --link-hover-color: #0a58ca;
+    --badge-bg: #adb5bd;
+    --footer-bg: #343a40;
+    --footer-text: #adb5bd;
+    --shadow-depth: rgba(255, 255, 255, 0.1);
+    --shadow-width: 0.25rem;
+    --shadow-height: 0.25rem;
+    --btn-add-text: #ffffff;
+    --btn-add-hover-text: #ffffff;
+    /* Add Task Button Variables */
+    --btn-add-bg: #17a2b8; /* Teal */
+    --btn-add-border: #17a2b8;
+    --btn-add-hover-bg: #138496; /* Darker Teal */
+}
 
-    /* Light Theme Colors */
-    --light-bg: #FFFFFF;
-    --light-text: #333333;
-    --light-text-secondary: #555555;
-    --light-navbar-bg: #FFFFFF;
-    --light-navbar-text: #333333;
-    --light-link: #007BFF;
-    --light-link-hover: #0056b3;
+/* Contrast Mode Variables */
+.contrast-mode {
+    --background-color: #000000;
+    --text-color: #ffffff;
+    --navbar-bg: #000000;
+    --navbar-text: #ffffff;
+    --card-bg: #000000;
+    --card-text: #ffffff;
+    --link-color: #ffff00;
+    --link-hover-color: #ff00ff;
+    --badge-bg: #ff0000;
+    --footer-bg: #000000;
+    --footer-text: #ffff00;
+    --shadow-depth: rgba(255, 255, 255, 0.2);
+    --shadow-width: 0.25rem;
+    --shadow-height: 0.25rem;
 
-    /* Accent Colors */
-    --accent-blue: #007BFF; /* Blue */
-    --accent-green: #28A745; /* Green */
-    --accent-red: #DC3545; /* Red */
-
-    /* Buttons */
-    --button-primary: var(--accent-blue);
-    --button-primary-hover: #0056b3;
-    --button-secondary: var(--accent-green);
-    --button-secondary-hover: #218838;
-    --button-danger: var(--accent-red);
-    --button-danger-hover: #C82333;
-
-    /* Card */
-    --card-bg: #FFFFFF;
-    --card-shadow: rgba(0, 0, 0, 0.1);
-
-    /* Borders and Radius */
-    --border-radius: 8px;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-
-    /* Transition */
-    --transition-speed: 0.3s;
-    --transition-ease: ease;
-
-    /* ========================= */
-    /*       Contrast Colors     */
-    /* ========================= */
-
-    /* Contrast Theme Colors */
-    --contrast-bg: #FFFFFF;
-    --contrast-text: #000000;
-    --contrast-text-secondary: #000000;
-    --contrast-navbar-bg: #FFFFFF;
-    --contrast-navbar-text: #000000;
-    --contrast-link: #FF0000;
-    --contrast-link-hover: #000000;
-
-    /* Contrast Accents */
-    --contrast-yellow: #FFFF00; /* Yellow */
-    --contrast-magenta: #FF00FF; /* Magenta */
-    --contrast-neon-green: #39FF14; /* Bright/Neon Green */
-
-    /* Contrast Buttons */
-    --contrast-button-primary: var(--contrast-yellow);
-    --contrast-button-primary-hover: #FFD700; /* Gold */
-    --contrast-button-secondary: var(--contrast-magenta);
-    --contrast-button-secondary-hover: #CC00CC;
-    --contrast-button-danger: var(--contrast-neon-green);
-    --contrast-button-danger-hover: #32CD32;
-
-    /* Contrast Card */
-    --contrast-card-bg: #FFFFFF;
-    --contrast-card-shadow: rgba(0, 0, 0, 0.2);
-
-    /* ========================= */
-    /*           Dark Theme      */
-    /* ========================= */
-
-    /* Dark Theme Colors */
-    --dark-bg: #000000;
-    --dark-text: #E0E0E0;
-    --dark-text-secondary: #B3B3B3;
-    --dark-navbar-bg: #333333;
-    --dark-navbar-text: #E0E0E0;
-    --dark-link: #1E90FF; /* Bright Blue */
-    --dark-link-hover: #00BFFF;
-
-    /* Dark Accents */
-    --dark-bright-blue: #1E90FF; /* Bright Blue */
-
-    /* Dark Buttons */
-    --dark-button-primary: var(--dark-bright-blue);
-    --dark-button-primary-hover: #00BFFF;
-    --dark-button-secondary: #555555;
-    --dark-button-secondary-hover: #777777;
-    --dark-button-danger: #FF4500; /* Orange Red */
-    --dark-button-danger-hover: #FF6347;
-
-    /* Dark Card */
-    --dark-card-bg: #1F1F1F;
-    --dark-card-shadow: rgba(255, 255, 255, 0.1);
+    /* Add Task Button Variables */
+    --btn-add-bg: #ff5722; /* Deep Orange */
+    --btn-add-text: #ffffff; /* White */
+    --btn-add-border: #ff5722;
+    --btn-add-hover-bg: #e64a19; /* Darker Deep Orange */
+    --btn-add-hover-text: #ffffff;
 }
 
 /* ============================= */
 /*         Base Styles           */
 /* ============================= */
 
-/* Reset and Base Styles */
+/* Apply Background and Text Colors */
 body {
-    font-family: var(--font-family-base), sans-serif;
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-    color: var(--light-text);
-    background-color: var(--light-bg);
-    margin: 0;
-    padding-bottom: 80px; /* Height of the footer */
-    transition: background-color var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-family-headings), sans-serif;
-    color: var(--color-primary);
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-p {
-    margin-bottom: 1rem;
-    color: var(--light-text-secondary);
-}
-
-/* Links */
+/* Link Styling */
 a {
-    color: var(--light-link);
-    text-decoration: var(--link-decoration);
-    transition: color var(--transition-speed) var(--transition-ease);
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 a:hover {
-    color: var(--light-link-hover);
-    text-decoration: var(--link-decoration-hover);
-}
-
-/* Buttons */
-.btn {
-    font-family: var(--font-family-base), sans-serif;
-    border-radius: var(--border-radius);
-    transition: background-color var(--transition-speed) var(--transition-ease), transform var(--transition-speed) var(--transition-ease), box-shadow var(--transition-speed) var(--transition-ease);
-}
-
-.btn-primary {
-    background-color: var(--button-primary);
-    border: none;
-    color: var(--color-secondary);
-    padding: 0.5rem 1rem;
-}
-
-.btn-primary:hover {
-    background-color: var(--button-primary-hover);
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background-color: var(--button-secondary);
-    border: none;
-    color: var(--color-secondary);
-    padding: 0.5rem 1rem;
-}
-
-.btn-secondary:hover {
-    background-color: var(--button-secondary-hover);
-    transform: translateY(-2px);
-}
-
-.btn-danger {
-    background-color: var(--button-danger);
-    border: none;
-    color: var(--color-secondary);
-    padding: 0.5rem 1rem;
-}
-
-.btn-danger:hover {
-    background-color: var(--button-danger-hover);
-    transform: translateY(-2px);
-}
-
-.btn-link {
-    background: none;
-    border: none;
-    color: var(--vibrant-green);
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: var(--link-decoration);
-    transition: color var(--transition-speed) var(--transition-ease);
-}
-
-.btn-link:hover {
-    color: var(--hover-green);
-    text-decoration: var(--link-decoration-hover);
-}
-
-/* Action Buttons */
-.btn-action {
-    padding: 0.3rem 0.5rem;
-    font-size: 1.2rem;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
-    cursor: pointer;
-}
-
-/* Hover Effects for Action Buttons */
-.btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Add Task Button */
-.btn-action.add-task-btn {
-    background-color: var(--button-primary);
-    color: var(--color-secondary);
-    border: none;
-}
-
-.btn-action.add-task-btn:hover {
-    background-color: var(--button-primary-hover);
-    color: var(--color-secondary);
-}
-
-/* Edit Button */
-.btn-action.edit-btn {
-    background-color: var(--button-secondary);
-    color: var(--color-secondary);
-    border: none;
-}
-
-.btn-action.edit-btn:hover {
-    background-color: var(--button-secondary-hover);
-    color: var(--color-secondary);
-}
-
-/* Delete Button */
-.btn-action.delete-btn {
-    background-color: var(--button-danger);
-    color: var(--color-secondary);
-    border: none;
-}
-
-.btn-action.delete-btn:hover {
-    background-color: var(--button-danger-hover);
-    color: var(--color-secondary);
+    color: var(--link-hover-color);
+    text-decoration: underline;
 }
 
 /* ============================= */
-/*         Forms Styles          */
+/*         Navbar Styles         */
 /* ============================= */
 
-/* Form Container */
-.form-container {
-    background-color: var(--card-bg);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    transition: background-color var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
+.navbar {
+    background-color: var(--navbar-bg) !important;
+    box-shadow: 0 2px 4px var(--shadow-depth);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Form Labels */
-.form-label {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--color-primary);
+.navbar .navbar-brand,
+.navbar .nav-link {
+    color: var(--navbar-text) !important;
+    transition: color 0.3s ease;
 }
 
-/* Input Fields */
-.form-control {
-    border: 1px solid #ced4da;
-    border-radius: var(--border-radius);
-    padding: 0.75rem 0.75rem;
-    font-size: 1rem;
-    color: var(--color-text);
-    background-color: var(--card-bg);
-    transition: border-color var(--transition-speed) var(--transition-ease), box-shadow var(--transition-speed) var(--transition-ease);
-}
-
-.form-control:focus {
-    border-color: var(--button-primary);
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    outline: none;
-}
-
-/* Checkbox Inputs */
-.form-check-input:checked {
-    background-color: var(--button-secondary);
-    border-color: var(--button-secondary);
-    transition: background-color var(--transition-speed) var(--transition-ease), border-color var(--transition-speed) var(--transition-ease);
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+    color: var(--link-hover-color) !important;
+    text-decoration: underline;
 }
 
 /* ============================= */
-/*           Tables              */
-/* ============================= */
-
-.table-hover tbody tr:hover {
-    background-color: rgba(40, 167, 69, 0.1);
-    cursor: pointer;
-}
-
-.dark-mode .table-hover tbody tr:hover {
-    background-color: rgba(187, 134, 252, 0.1);
-}
-
-.contrast-mode .table-hover tbody tr:hover {
-    background-color: rgba(255, 0, 0, 0.1);
-}
-
-.table-responsive {
-    margin-bottom: 1.5rem;
-}
-
-/* ============================= */
-/*           Footer              */
+/*         Footer Styles         */
 /* ============================= */
 
 .footer-custom {
-    background-color: var(--color-primary);
-    color: var(--color-secondary);
-    position: fixed;
-    bottom: 0;
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
     width: 100%;
-    padding: 1rem 0;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    transition: background-color var(--transition-speed) var(--transition-ease), color var(--transition-speed) var(--transition-ease);
-}
-
-.footer-custom a {
-    color: var(--color-secondary);
-    text-decoration: underline;
-    transition: color var(--transition-speed) var(--transition-ease);
-}
-
-.footer-custom a:hover {
-    color: var(--light-gray);
-    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ============================= */
-/*       Contrast Mode Styles    */
+/*        Button Styles          */
 /* ============================= */
 
-/* Contrast Mode Specific Overrides */
-.contrast-mode {
-    /* Override primary variables */
-    --color-primary: var(--contrast-text);
-    --color-secondary: var(--contrast-background);
-    --color-text: var(--contrast-text);
-    --color-text-secondary: var(--contrast-text-secondary);
-    --color-link: var(--contrast-link);
-    --color-link-hover: var(--contrast-link-hover);
-
-    /* Buttons */
-    --button-primary: var(--contrast-button-primary); /* Yellow */
-    --button-primary-hover: var(--contrast-button-primary-hover); /* Gold */
-    --button-secondary: var(--contrast-button-secondary); /* Magenta */
-    --button-secondary-hover: var(--contrast-button-secondary-hover); /* Dark Magenta */
-    --button-danger: var(--contrast-button-danger); /* Neon Green */
-    --button-danger-hover: var(--contrast-button-danger-hover); /* Darker Neon Green */
-
-    /* Accents */
-    --vibrant-green: var(--contrast-neon-green); /* Neon Green for Add Task */
-    --hover-green: var(--contrast-neon-green); /* Same for consistency */
-
-    /* Grays */
-    --background-color: var(--contrast-bg);
-    --light-gray: var(--contrast-text);
-    --lighter-gray: var(--contrast-bg);
-
-    /* Card */
-    --card-bg: var(--contrast-card-bg);
-    --card-shadow: var(--contrast-card-shadow);
-
-    /* Links */
-    --link-decoration: var(--contrast-link-decoration);
-    --link-decoration-hover: var(--contrast-link-decoration-hover);
-
-    /* Shadows */
-    --shadow-sm: var(--contrast-shadow-sm);
-    --shadow-md: var(--contrast-shadow-md);
-    --shadow-lg: var(--contrast-shadow-lg);
+.btn-add-task {
+    background-color: var(--btn-add-bg);
+    color: var(--btn-add-text);
+    border: 2px solid var(--btn-add-border);
+    border-radius: 0; /* Sharp Edges */
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
 }
 
-/* Navbar Contrast Mode */
-.contrast-mode .navbar-custom {
-    background-color: var(--contrast-navbar-bg); /* White navbar */
+.btn-add-task:hover {
+    background-color: var(--btn-add-hover-bg);
+    color: var(--btn-add-hover-text);
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
-.contrast-mode .nav-link.home,
-.contrast-mode .nav-link.login,
-.contrast-mode .nav-link.register,
-.contrast-mode .nav-link.logout,
-.contrast-mode .nav-link.tasks {
-    color: var(--contrast-navbar-text); /* Black text for nav links */
+.btn-add-task:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5); /* Accessible focus */
 }
 
-.contrast-mode .nav-link.home:hover,
-.contrast-mode .nav-link.login:hover,
-.contrast-mode .nav-link.register:hover,
-.contrast-mode .nav-link.logout:hover,
-.contrast-mode .nav-link.tasks:hover {
-    color: var(--contrast-link); /* Bright red on hover */
-}
+/* ============================= */
+/*          Card Styles          */
+/* ============================= */
 
-.contrast-mode .navbar-brand {
-    color: var(--contrast-navbar-text); /* Black brand name */
-}
-
-.contrast-mode .navbar-brand:hover {
-    color: var(--contrast-link); /* Bright red on hover */
-}
-
-/* Footer Contrast Mode */
-.contrast-mode .footer-custom {
-    background-color: var(--contrast-navbar-bg); /* White footer */
-    color: var(--contrast-navbar-text); /* Black text */
-}
-
-.contrast-mode a {
-    color: var(--contrast-link); /* Bright red links */
-}
-
-.contrast-mode a:hover {
-    color: var(--contrast-navbar-text); /* Black on hover */
-}
-
-/* Cards Contrast Mode */
-.contrast-mode .card {
+.card {
     background-color: var(--card-bg);
-    color: var(--color-primary);
-    box-shadow: var(--card-shadow);
-}
-
-/* Forms Contrast Mode */
-.contrast-mode .form-control {
-    background-color: var(--card-bg);
-    border-color: var(--color-primary);
-    color: var(--color-text);
-}
-
-.contrast-mode .form-control:focus {
-    border-color: var(--color-link);
-    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
-}
-
-/* Action Buttons in Contrast Mode */
-.contrast-mode .btn-action.add-task-btn {
-    background-color: var(--button-primary);
-    color: var(--color-text);
+    color: var(--card-text);
+    box-shadow: 0 4px 6px var(--shadow-depth);
     border: none;
+    border-radius: 12px;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.contrast-mode .btn-action.add-task-btn:hover {
-    background-color: var(--button-primary-hover);
-    color: var(--color-secondary);
+.card:hover {
+    box-shadow: 0 6px 12px var(--shadow-depth);
+    transform: translateY(-4px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.contrast-mode .btn-action.edit-btn {
-    background-color: var(--button-secondary);
-    color: var(--color-secondary);
-    border: none;
+.card-title {
+    font-weight: 600;
 }
 
-.contrast-mode .btn-action.edit-btn:hover {
-    background-color: var(--button-secondary-hover);
-    color: var(--color-secondary);
-}
-
-.contrast-mode .btn-action.delete-btn {
-    background-color: var(--button-danger);
-    color: var(--color-secondary);
-    border: none;
-}
-
-.contrast-mode .btn-action.delete-btn:hover {
-    background-color: var(--button-danger-hover);
-    color: var(--color-secondary);
+.card-text {
+    font-size: 1.25rem;
 }
 
 /* ============================= */
-/*         Dark Theme Styles    */
+/*          Badge Styles         */
 /* ============================= */
 
-/* Dark Mode Specific Overrides */
-.dark-mode {
-    /* Override primary variables */
-    --color-primary: var(--dark-text);
-    --color-secondary: var(--dark-bg);
-    --color-text: var(--dark-text);
-    --color-text-secondary: var(--dark-text-secondary);
-    --color-link: var(--dark-link);
-    --color-link-hover: var(--dark-link-hover);
-
-    /* Buttons */
-    --button-primary: var(--dark-button-primary); /* Bright Blue */
-    --button-primary-hover: var(--dark-button-primary-hover); /* Lighter Blue */
-    --button-secondary: var(--dark-button-secondary); /* Gray */
-    --button-secondary-hover: var(--dark-button-secondary-hover); /* Lighter Gray */
-    --button-danger: var(--dark-button-danger); /* Orange Red */
-    --button-danger-hover: var(--dark-button-danger-hover); /* Darker Orange Red */
-
-    /* Accents */
-    --vibrant-green: var(--accent-green); /* Retain Green */
-    --hover-green: var(--hover-green);
-
-    /* Grays */
-    --background-color: var(--dark-bg);
-    --light-gray: #B3B3B3;
-    --lighter-gray: #1F1F1F;
-
-    /* Card */
-    --card-bg: var(--dark-card-bg);
-    --card-shadow: var(--dark-card-shadow);
-
-    /* Links */
-    --link-decoration: none;
-    --link-decoration-hover: underline;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.05);
-    --shadow-md: 0 4px 6px rgba(255, 255, 255, 0.1);
-    --shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.1);
-}
-
-/* Navbar Dark Mode */
-.dark-mode .navbar-custom {
-    background-color: var(--dark-navbar-bg); /* Grey navbar */
-}
-
-.dark-mode .nav-link.home,
-.dark-mode .nav-link.login,
-.dark-mode .nav-link.register,
-.dark-mode .nav-link.logout,
-.dark-mode .nav-link.tasks {
-    color: var(--dark-navbar-text); /* White/Grey text for nav links */
-}
-
-.dark-mode .nav-link.home:hover,
-.dark-mode .nav-link.login:hover,
-.dark-mode .nav-link.register:hover,
-.dark-mode .nav-link.logout:hover,
-.dark-mode .nav-link.tasks:hover {
-    color: var(--dark-link); /* Bright Blue on hover */
-}
-
-.dark-mode .navbar-brand {
-    color: var(--dark-navbar-text); /* White/Grey brand name */
-}
-
-.dark-mode .navbar-brand:hover {
-    color: var(--dark-link); /* Bright Blue on hover */
-}
-
-/* Footer Dark Mode */
-.dark-mode .footer-custom {
-    background-color: var(--dark-navbar-bg); /* Grey footer */
-    color: var(--dark-navbar-text); /* White/Grey text */
-}
-
-.dark-mode a {
-    color: var(--dark-link); /* Bright Blue links */
-}
-
-.dark-mode a:hover {
-    color: var(--dark-navbar-text); /* White/Grey on hover */
-}
-
-/* Cards Dark Mode */
-.dark-mode .card {
-    background-color: var(--card-bg);
-    color: var(--color-primary);
-    box-shadow: var(--card-shadow);
-}
-
-/* Forms Dark Mode */
-.dark-mode .form-control {
-    background-color: var(--card-bg);
-    border-color: var(--color-primary);
-    color: var(--color-text);
-}
-
-.dark-mode .form-control:focus {
-    border-color: var(--dark-link);
-    box-shadow: 0 0 0 0.2rem rgba(30, 144, 255, 0.25); /* Bright Blue focus shadow */
+.badge {
+    font-size: 0.9rem;
+    padding: 0.4em 0.6em;
+    border-radius: 12px;
+    background-color: var(--badge-bg) !important;
+    color: #ffffff !important;
+    transition: background-color 0.3s ease;
 }
 
 /* ============================= */
-/*         Responsive Design     */
+/*         Alert Styles          */
 /* ============================= */
 
-/* Responsive Typography */
+.alert {
+    border-radius: 12px;
+    box-shadow: 0 2px 4px var(--shadow-depth);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* ============================= */
+/*        Dropdown Styles        */
+/* ============================= */
+
+.dropdown-menu {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px var(--shadow-depth);
+}
+
+/* ============================= */
+/*     Flash Messages Styles     */
+/* ============================= */
+
+.container.mt-4 .alert {
+    margin-bottom: 1rem;
+}
+
+/* ============================= */
+/*         Responsive Styles     */
+/* ============================= */
+
 @media (max-width: 768px) {
-    h1 {
-        font-size: 2rem;
+    .navbar .navbar-brand {
+        font-size: 1.2rem;
     }
 
-    h2 {
-        font-size: 1.75rem;
+    .navbar .nav-link {
+        font-size: 0.95rem;
     }
 
-    h3 {
-        font-size: 1.5rem;
-    }
-
-    .navbar-custom .nav-link {
+    .card-text {
         font-size: 1rem;
     }
 
-    .navbar-custom .navbar-brand {
-        font-size: 1.25rem;
-    }
-
-    .btn-action {
-        width: 30px;
-        height: 30px;
-        font-size: 1rem;
+    .badge {
+        font-size: 0.8rem;
     }
 }
 
 /* ============================= */
-/*       Additional Styles       */
+/*        Utility Classes         */
 /* ============================= */
 
-/* Loading Spinner Overlay */
-#loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
+/* Center Content Vertically and Horizontally */
+.center-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
-    transition: background-color var(--transition-speed) var(--transition-ease);
+    height: 100%;
 }
 
-.dark-mode #loading {
-    background-color: rgba(0, 0, 0, 0.7);
+/* Additional Padding and Margins */
+.mt-auto {
+    margin-top: auto;
 }
 
-.contrast-mode #loading {
-    background-color: rgba(255, 255, 255, 0.7);
-}
+/* ============================= */
+/*         Optional Styles       */
+/* ============================= */
 
-/* Smooth Scroll */
+/* Smooth Scroll Behavior */
 html {
     scroll-behavior: smooth;
-}
-
-/* Flexbox Utility Classes */
-.flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.flex-between {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
