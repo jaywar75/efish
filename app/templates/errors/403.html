@@ -1,0 +1,12 @@
+<!-- app/templates/errors/403.html -->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mt-5">
+    <h1 class="display-3">403</h1>
+    <p class="lead">Forbidden: You don't have permission to access this resource.</p>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+        <i class="fas fa-home"></i> Return Home
+    </a>
+</div>
+{% endblock %}

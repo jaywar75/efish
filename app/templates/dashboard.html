@@ -1,0 +1,12 @@
+<!-- app/templates/dashboard.html -->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mt-4"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <p class="lead">Welcome, {{ current_user.username }}!</p>
+        <!-- Add dashboard content here -->
+    </div>
+</div>
+{% endblock %}
