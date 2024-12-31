@@ -33,7 +33,7 @@ from flask_mail import Message
 def register():
     """
     A basic registration route that:
-      - Validates the form.
+      - Collects first_name (and optionally last_name), email, and password.
       - Inserts a new user document in MongoDB.
       - Redirects to the login page on success.
     """
@@ -41,11 +41,12 @@ def register():
         return redirect(url_for("main.dashboard"))
 
     form = RegistrationForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit():  # or if request.method == "POST" if no validators
         # Hash the password
         hashed_pw = generate_password_hash(form.password.data)
         new_user = {
-            "username": form.username.data,
+            "first_name": form.first_name.data,
+            "last_name": form.last_name.data,   # if you capture this in the form
             "email": form.email.data.lower(),
             "password_hash": hashed_pw,
         }
@@ -82,7 +83,6 @@ def login():
 
         # Check password
         if user_obj.verify_password(form.password.data):
-            # Optionally use 'remember=form.remember.data' if you have a 'remember' field
             login_user(user_obj)
             flash("Login successful!", "success")
             return redirect(url_for("main.dashboard"))
@@ -105,9 +105,7 @@ def logout():
 @auth_bp.route("/reset_request", methods=["GET", "POST"])
 def reset_request():
     """
-    This route handles the process of requesting a password reset.
-    The user supplies their email address, and if it exists,
-    an email with a reset token link is sent.
+    Handles requesting a password reset via email.
     """
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
@@ -119,7 +117,7 @@ def reset_request():
             user_obj = User(user_doc)
             send_reset_email(user_obj)
 
-        # For security, do not reveal if email doesn't exist in the system
+        # Security measure: do not reveal if the email doesn't exist
         flash("If the account exists, you will receive a password-reset email.", "info")
         return redirect(url_for("auth.login"))
 
@@ -129,21 +127,20 @@ def reset_request():
 @auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
 def reset_password(token):
     """
-    The route that handles the actual password-reset form.
-    The link here is typically emailed to the user containing the token.
+    Handles the actual password-reset form (via token link).
     """
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
 
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     try:
-        # The token stores the user's email (or user ID).
-        email = s.loads(token, max_age=1800)  # 30 min expiry, adjust as needed
+        # Token stores the user's email (or user ID).
+        email = s.loads(token, max_age=1800)  # 30 min expiry
     except SignatureExpired:
         flash("Your reset link has expired. Please request a new one.", "warning")
         return redirect(url_for("auth.reset_request"))
     except BadSignature:
-        flash("Invalid token. Please request a new password reset link.", "danger")
+        flash("Invalid token. Please request a new reset link.", "danger")
         return redirect(url_for("auth.reset_request"))
 
     user_doc = mongo.db.users.find_one({"email": email})
@@ -168,10 +165,10 @@ def send_reset_email(user_obj):
     """
     A helper function that:
       1. Generates a token for the user.
-      2. Constructs and sends an email containing the reset link.
+      2. Sends an email containing the reset link to that user.
     """
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
-    token = s.dumps(user_obj.email)  # embedding the email in the token
+    token = s.dumps(user_obj.email)  # embed the email in the token
 
     # Example: http://127.0.0.1:5000/auth/reset_password/<token>
     reset_url = url_for("auth.reset_password", token=token, _external=True)
@@ -180,8 +177,10 @@ def send_reset_email(user_obj):
     sender = current_app.config.get("MAIL_DEFAULT_SENDER", "no-reply@example.com")
     recipients = [user_obj.email]
 
+    # Use 'first_name' instead of 'username'. If your model stores first_name, do user_obj.first_name.
+    # If last_name is optional, you can combine them or just use first_name alone.
     body = f"""\
-Hello {user_obj.username},
+Hello {user_obj.first_name},
 
 You requested a password reset. Please visit the link below to set a new password:
 {reset_url}

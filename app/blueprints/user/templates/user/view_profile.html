@@ -1,21 +1,26 @@
-<!-- user/view_profile.html -->
+<!-- app/blueprints/user/templates/user/view_profile.html -->
 {% extends "base.html" %}
-{% block title %}Your Profile{% endblock %}
 {% block content %}
-  <div class="container mt-4">
-    <h1>Profile Details</h1>
+<div class="container mt-4">
+    <h2>Your Profile</h2>
 
-    <!-- Now 'user' is the entire DB document, so you can show all fields -->
-    <p><strong>Username:</strong> {{ user.username }}</p>
+    <!-- Basic Info -->
     <p><strong>Email:</strong> {{ user.email }}</p>
     <p><strong>First Name:</strong> {{ user.first_name }}</p>
     <p><strong>Last Name:</strong> {{ user.last_name }}</p>
     <p><strong>Phone:</strong> {{ user.phone }}</p>
     <p><strong>Time Zone:</strong> {{ user.time_zone }}</p>
     <p><strong>About Me:</strong> {{ user.about_me }}</p>
-    ...
-    <a href="{{ url_for('user.edit_profile') }}" class="btn btn-primary">
-      Edit Profile
-    </a>
-  </div>
+
+    <hr>
+    <!-- If you prefer a read-only form approach, you could use
+         {{ form.email() }} or similar here. -->
+
+    <!-- Link to edit profile route -->
+    <p>
+        <a href="{{ url_for('user.edit_profile') }}" class="btn btn-primary">
+            Edit Profile
+        </a>
+    </p>
+</div>
 {% endblock %}

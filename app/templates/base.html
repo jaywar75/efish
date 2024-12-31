@@ -16,78 +16,95 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <!-- Brand / Logo -->
-            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Efish</a>
+            <!-- Brand (Logo) on the far left -->
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-tasks me-1"></i> efish
+            </a>
 
-            <!-- Mobile / smaller screens toggler -->
+            <!-- Toggler for mobile view -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarNav" aria-controls="navbarNav"
                     aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+              <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Collapsible Navbar Section -->
+            <!-- Collapsible section -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
 
-                    {% if current_user.is_authenticated %}
-                        <!-- Example: Dashboard Link -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
-                            </a>
-                        </li>
+              <!-- Left-justified items (Dashboard, etc.) -->
+              <ul class="navbar-nav me-auto">
+                {% if current_user.is_authenticated %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                      <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                  </li>
+                {% endif %}
 
-                        <!-- User Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i>
-                                {{ current_user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('user.view_profile') }}">
-                                        <i class="fas fa-user"></i> View Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('user.edit_profile') }}">
-                                        <i class="fas fa-edit"></i> Edit Profile
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <!-- If NOT Authenticated: Login/Register links -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="fas fa-sign-in-alt"></i> Login
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">
-                                <i class="fas fa-user-plus"></i> Register
-                            </a>
-                        </li>
-                    {% endif %}
+                <!-- Additional left-justified items can go here -->
+              </ul>
 
-                    <!-- Environment Label Nav-Item with Tooltip -->
-                    <li class="nav-item d-flex align-items-center ms-3"
-                        data-bs-toggle="tooltip" data-bs-placement="bottom"
-                        title="Current environment setting.">
-                        <i class="fas fa-info-circle me-1 text-info"></i>
-                        <span class="text-info">
-                            Currently in: <strong>{{ current_environment }}</strong>
-                        </span>
-                    </li>
-                </ul>
+              <!-- Right-justified user dropdown -->
+              <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fas fa-user-circle"></i>
+                      Welcome, {{ current_user.first_name }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                      <li>
+                        <a class="dropdown-item" href="{{ url_for('user.view_profile') }}">
+                          <i class="fas fa-user"></i> View Profile
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="{{ url_for('user.edit_profile') }}">
+                          <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                      </li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                          <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                {% else %}
+                  <!-- If not authenticated: display Login / Register on the right -->
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">
+                      <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">
+                      <i class="fas fa-user-plus"></i> Register
+                    </a>
+                  </li>
+                {% endif %}
+
+                <!-- Environment label or any other right-justified nav items -->
+                {% set env_class = "" %}
+                {% if current_environment == "Production" %}
+                  {% set env_class = "env-prod" %}
+                {% elif current_environment == "Testing" %}
+                  {% set env_class = "env-test" %}
+                {% else %}
+                  {% set env_class = "env-dev" %}
+                {% endif %}
+
+                <li class="nav-item d-flex align-items-center ms-3"
+                    data-bs-toggle="tooltip" data-bs-placement="bottom"
+                    title="Current environment setting.">
+                  <i class="fas fa-info-circle me-1 {{ env_class }}"></i>
+                  <span class="{{ env_class }}">
+                    Currently in: <strong>{{ current_environment }}</strong>
+                  </span>
+                </li>
+              </ul>
             </div>
         </div>
     </nav>

@@ -4,54 +4,49 @@ from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
     TextAreaField,
-    SubmitField,
-    SelectField
+    SubmitField
+    # If you decide to reintroduce time-zone choices in the future,
+    # you can re-add: SelectField
 )
-from wtforms.validators import DataRequired, Email, Optional
 
 
 class ViewProfileForm(FlaskForm):
     """
-    A minimal form for showing all profile fields in read-only mode.
-    Typically, you might not need a form at all if you’re only displaying data.
-    However, if you want consistent structure (e.g., same fields as edit form),
-    you can keep this form to show them.
-
-    By default, we won't add validators that enforce requirements for display.
+    A minimal form for displaying user profile fields in read-only mode.
+    By default, we won’t add validations for display purposes.
     """
-    username = StringField("Username")
     email = StringField("Email")
     first_name = StringField("First Name")
     last_name = StringField("Last Name")
     phone = StringField("Phone")
     time_zone = StringField("Time Zone")
     about_me = TextAreaField("About Me")
-    # Typically, no submit button is necessary on a "view-only" form,
-    # unless you plan to have minimal interactive elements.
-    # e.g., submit = SubmitField("Some Action")
+    # Typically, a view-only form doesn't need a submit button,
+    # unless you plan to include interactive elements.
 
 
 class EditProfileForm(FlaskForm):
     """
-    Form for editing the user’s profile details.
-    Fields here mirror the data you want users to be able to update.
+    A form for editing the user’s profile details.
     """
-    username = StringField("Username", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    first_name = StringField("First Name", validators=[Optional()])
-    last_name = StringField("Last Name", validators=[Optional()])
-    phone = StringField("Phone", validators=[Optional()])
+    email = StringField("Email")
+    first_name = StringField("First Name")
+    last_name = StringField("Last Name")
+    phone = StringField("Phone")
 
-    # If you want a predefined set of time zones, you could do:
-    # time_zone = SelectField("Time Zone", choices=[
-    #     ('UTC','UTC'),
-    #     ('America/New_York','America/New_York'),
-    #     ('Europe/London','Europe/London'),
-    #     ...
-    # ], validators=[Optional()])
-    # Otherwise a free-text field:
-    time_zone = StringField("Time Zone", validators=[Optional()])
+    # If you plan to offer a dropdown for time zones in the future,
+    # you can uncomment and use SelectField:
+    # time_zone = SelectField(
+    #     "Time Zone",
+    #     choices=[
+    #         ('UTC','UTC'),
+    #         ('America/New_York','America/New_York'),
+    #         ('Europe/London','Europe/London'),
+    #         ...
+    #     ]
+    # )
+    time_zone = StringField("Time Zone")
 
-    about_me = TextAreaField("About Me", validators=[Optional()])
+    about_me = TextAreaField("About Me")
 
     submit = SubmitField("Update Profile")

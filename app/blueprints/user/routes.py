@@ -4,71 +4,96 @@ from bson import ObjectId
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from . import user_bp
-from .forms import EditProfileForm, ViewProfileForm
-from ...extensions import mongo
+from .forms import ViewProfileForm, EditProfileForm
+from ...extensions import mongo  # Adjust import path if your 'extensions' location differs
 
 
 @user_bp.route('/profile', methods=['GET'])
 @login_required
 def view_profile():
     """
-    Display the logged-in user's profile page.
-    If needed, you can fetch fresh data from Mongo.
-    But if current_user is already loaded from DB on each request,
-    you can simply rely on it.
-
-    Example of using a ViewProfileForm if you want
-    to show read-only fields or gather minimal input.
+    Displays the currently logged-in user's profile in read-only mode.
+    We re-query Mongo to ensure we have the latest data, rather than relying
+    on the potentially stale session object in current_user.
     """
-    form = ViewProfileForm(obj=current_user)
+    user_id = current_user.get_id()  # or current_user._id if that's how you store it
+    user_doc = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_doc:
+        flash("User not found in the database.", "danger")
+        return redirect(url_for("main.dashboard"))
 
-    # Typically, on a GET request, we wouldn’t do form.validate_on_submit().
-    # But if you had a button on the profile page that posts data
-    # (e.g. "Change Avatar" or something), you could handle it here.
-    # For now, we’ll just ignore form POST logic since the route is GET only.
+    # Populate a read-only form (no validators, purely for display)
+    form = ViewProfileForm()
+    form.email.data      = user_doc.get("email", "")
+    form.first_name.data = user_doc.get("first_name", "")
+    form.last_name.data  = user_doc.get("last_name", "")
+    form.phone.data      = user_doc.get("phone", "")
+    form.time_zone.data  = user_doc.get("time_zone", "")
+    form.about_me.data   = user_doc.get("about_me", "")
 
-    return render_template('user/view_profile.html', user=current_user, form=form)
+    # Pass the fresh user_doc & form to the template
+    return render_template(
+        "user/view_profile.html",
+        user=user_doc,
+        form=form
+    )
 
 
 @user_bp.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     """
-    Let the user update their profile details.
-    We'll store them in the same 'users' collection that auth uses.
+    Allows the currently logged-in user to update their profile details.
+    Re-queries Mongo for the user's document and updates fields on POST.
     """
-    form = EditProfileForm(obj=current_user)
+    user_id = current_user.get_id()
+    user_doc = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_doc:
+        flash("User not found in the database.", "danger")
+        return redirect(url_for("main.dashboard"))
 
-    if form.validate_on_submit():
-        # 1) Gather form data
-        #    (Your EditProfileForm might have fields: first_name, last_name, phone, about_me, etc.)
+    form = EditProfileForm()
+
+    if request.method == "GET":
+        # Pre-populate the form fields with what's in Mongo
+        form.email.data      = user_doc.get("email", "")
+        form.first_name.data = user_doc.get("first_name", "")
+        form.last_name.data  = user_doc.get("last_name", "")
+        form.phone.data      = user_doc.get("phone", "")
+        form.time_zone.data  = user_doc.get("time_zone", "")
+        form.about_me.data   = user_doc.get("about_me", "")
+
+    elif form.validate_on_submit():
+        # Collect updated data from the form
         updated_fields = {
             "email":      form.email.data,
-            "first_name": request.form.get('first_name', ''),
-            "last_name":  request.form.get('last_name', ''),
-            "phone":      request.form.get('phone', ''),
-            "time_zone":  request.form.get('time_zone', ''),
-            "about_me":   request.form.get('about_me', ''),
+            "first_name": form.first_name.data,
+            "last_name":  form.last_name.data,
+            "phone":      form.phone.data,
+            "time_zone":  form.time_zone.data,
+            "about_me":   form.about_me.data,
         }
 
-        # 2) Convert current_user’s ID to ObjectId if necessary
-        user_id = current_user.get_id()  # or current_user._id if that’s how you store it
-
-        # 3) Update the user document in Mongo
+        # Update in Mongo
         result = mongo.db.users.update_one(
             {"_id": ObjectId(user_id)},
             {"$set": updated_fields}
         )
 
-        # 4) Check result and flash a message
         if result.modified_count > 0:
             flash("Profile updated successfully!", "success")
         else:
-            # Possibly means no changes were made or user_id wasn't found
-            flash("No changes or user not found.", "warning")
+            # Possibly the user made no changes, or the user was not found
+            flash("No changes made or user not found.", "warning")
 
-        # Redirect to profile page
-        return redirect(url_for('user.view_profile'))
+        return redirect(url_for("user.view_profile"))
+    else:
+        # If POST but form validation failed:
+        flash("Please correct the errors below.", "danger")
 
-    # On GET or if form fails validation, show the edit form
-    return render_template('user/edit_profile.html', form=form, user=current_user)
+    # Render the template with the form (and optionally user_doc)
+    return render_template(
+        "user/edit_profile.html",
+        form=form,
+        user=user_doc
+    )

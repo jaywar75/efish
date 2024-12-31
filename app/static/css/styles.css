@@ -17,3 +17,19 @@ h1, h2, h3, h4, h5, h6 {
 .btn-block {
     width: 100%;
 }
+
+/* color for environment label */
+.env-prod {
+  color: #ffffff; /* bright white */
+  font-weight: bold;
+}
+
+.env-test {
+  color: #ff0000; /* bright red */
+  font-weight: bold;
+}
+
+.env-dev {
+  color: #39FF14; /* bright neon green, etc. */
+  font-weight: bold;
+}
