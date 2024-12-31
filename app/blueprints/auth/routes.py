@@ -1,101 +1,196 @@
 # app/blueprints/auth/routes.py
 
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_user, current_user, logout_user, login_required
+import secrets
+from flask import (
+    render_template,
+    redirect,
+    url_for,
+    flash,
+    request,
+    current_app
+)
+from flask_login import (
+    login_user,
+    current_user,
+    logout_user,
+    login_required
+)
 from app.blueprints.auth import auth_bp
-from app.blueprints.auth.forms import RegistrationForm, LoginForm, RequestResetForm, ResetPasswordForm
+from app.blueprints.auth.forms import (
+    RegistrationForm,
+    LoginForm,
+    RequestResetForm,
+    ResetPasswordForm
+)
 from app.models.user import User
-from app.extensions import mail
-from flask_mail import Message
+from werkzeug.security import generate_password_hash
+from app.extensions import mongo, mail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-import os
+from flask_mail import Message
 
-# Initialize Serializer for token generation
-serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY', 'your_default_secret_key'))
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    """
+    A basic registration route that:
+      - Validates the form.
+      - Inserts a new user document in MongoDB.
+      - Redirects to the login page on success.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for("main.dashboard"))
+
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User.create(
-            username=form.username.data,
-            email=form.email.data,
-            password=form.password.data
-        )
-        flash('Your account has been created! You can now log in.', 'success')
-        return redirect(url_for('auth.login'))
-    return render_template('register.html', title='Register', form=form)
+        # Hash the password
+        hashed_pw = generate_password_hash(form.password.data)
+        new_user = {
+            "username": form.username.data,
+            "email": form.email.data.lower(),
+            "password_hash": hashed_pw,
+        }
+        # Insert user into Mongo
+        mongo.db.users.insert_one(new_user)
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+        flash("Registration successful! You can now log in.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("register.html", form=form)
+
+
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    A minimal login route that:
+      - Looks up the user by email.
+      - Verifies the hashed password.
+      - Redirects to a 'dashboard' or home page on success.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for("main.dashboard"))
+
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.get_by_email(form.email.data)
-        if user and user.verify_password(form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            flash('Logged in successfully.', 'success')
-            return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
+        # Find user by email
+        user_doc = mongo.db.users.find_one({"email": form.email.data.lower()})
+        if not user_doc:
+            flash("Invalid email or password", "danger")
+            return render_template("login.html", form=form)
+
+        # Convert doc to User model
+        user_obj = User(user_doc)
+
+        # Check password
+        if user_obj.verify_password(form.password.data):
+            # Optionally use 'remember=form.remember.data' if you have a 'remember' field
+            login_user(user_obj)
+            flash("Login successful!", "success")
+            return redirect(url_for("main.dashboard"))
         else:
-            flash('Login unsuccessful. Please check email and password.', 'danger')
-    return render_template('login.html', title='Login', form=form)
+            flash("Invalid email or password", "danger")
 
-@auth_bp.route('/logout')
+    return render_template("login.html", form=form)
+
+
+@auth_bp.route("/logout")
 def logout():
+    """
+    A basic logout route that logs the user out and redirects to the login.
+    """
     logout_user()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('auth.login'))
+    flash("You have been logged out.", "info")
+    return redirect(url_for("auth.login"))
 
-@auth_bp.route('/reset_password', methods=['GET', 'POST'])
+
+@auth_bp.route("/reset_request", methods=["GET", "POST"])
 def reset_request():
+    """
+    This route handles the process of requesting a password reset.
+    The user supplies their email address, and if it exists,
+    an email with a reset token link is sent.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for("main.dashboard"))
+
     form = RequestResetForm()
     if form.validate_on_submit():
-        user = User.get_by_email(form.email.data)
-        token = serializer.dumps(user.email, salt='password-reset-salt')
-        reset_url = url_for('auth.reset_token', token=token, _external=True)
-        send_reset_email(user.email, reset_url)
-        flash('An email has been sent with instructions to reset your password.', 'info')
-        return redirect(url_for('auth.login'))
-    return render_template('password_recovery.html', title='Reset Password', form=form)
+        user_doc = mongo.db.users.find_one({"email": form.email.data.lower()})
+        if user_doc:
+            user_obj = User(user_doc)
+            send_reset_email(user_obj)
 
-@auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_token(token):
+        # For security, do not reveal if email doesn't exist in the system
+        flash("If the account exists, you will receive a password-reset email.", "info")
+        return redirect(url_for("auth.login"))
+
+    return render_template("reset_request.html", form=form)
+
+
+@auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """
+    The route that handles the actual password-reset form.
+    The link here is typically emailed to the user containing the token.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for("main.dashboard"))
+
+    s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     try:
-        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)  # 1 hour expiration
+        # The token stores the user's email (or user ID).
+        email = s.loads(token, max_age=1800)  # 30 min expiry, adjust as needed
     except SignatureExpired:
-        flash('The reset link has expired. Please request a new one.', 'warning')
-        return redirect(url_for('auth.reset_request'))
+        flash("Your reset link has expired. Please request a new one.", "warning")
+        return redirect(url_for("auth.reset_request"))
     except BadSignature:
-        flash('Invalid reset token.', 'danger')
-        return redirect(url_for('auth.reset_request'))
+        flash("Invalid token. Please request a new password reset link.", "danger")
+        return redirect(url_for("auth.reset_request"))
+
+    user_doc = mongo.db.users.find_one({"email": email})
+    if not user_doc:
+        flash("Could not find a matching user. Contact support.", "danger")
+        return redirect(url_for("auth.reset_request"))
+
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        user = User.get_by_email(email)
-        if user:
-            new_password_hash = generate_password_hash(form.password.data)
-            mongo.db.users.update_one({'_id': ObjectId(user.id)}, {'$set': {'password_hash': new_password_hash}})
-            flash('Your password has been updated! You can now log in.', 'success')
-            return redirect(url_for('auth.login'))
-        else:
-            flash('User not found.', 'danger')
-            return redirect(url_for('auth.register'))
-    return render_template('reset_password.html', title='Reset Password', form=form)
+        hashed_pw = generate_password_hash(form.password.data)
+        mongo.db.users.update_one(
+            {"_id": user_doc["_id"]},
+            {"$set": {"password_hash": hashed_pw}}
+        )
+        flash("Your password has been updated! You can now log in.", "success")
+        return redirect(url_for("auth.login"))
 
-def send_reset_email(to_email, reset_url):
-    msg = Message('Password Reset Request',
-                  sender=os.getenv('MAIL_USERNAME'),
-                  recipients=[to_email])
-    msg.body = f'''To reset your password, visit the following link:
+    return render_template("reset_password.html", form=form)
+
+
+def send_reset_email(user_obj):
+    """
+    A helper function that:
+      1. Generates a token for the user.
+      2. Constructs and sends an email containing the reset link.
+    """
+    s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+    token = s.dumps(user_obj.email)  # embedding the email in the token
+
+    # Example: http://127.0.0.1:5000/auth/reset_password/<token>
+    reset_url = url_for("auth.reset_password", token=token, _external=True)
+
+    subject = "Password Reset Request"
+    sender = current_app.config.get("MAIL_DEFAULT_SENDER", "no-reply@example.com")
+    recipients = [user_obj.email]
+
+    body = f"""\
+Hello {user_obj.username},
+
+You requested a password reset. Please visit the link below to set a new password:
 {reset_url}
 
-If you did not make this request, simply ignore this email and no changes will be made.
-'''
+If you did not request this reset, simply ignore this email.
+
+Thanks,
+Your Support Team
+"""
+
+    msg = Message(subject=subject, sender=sender, recipients=recipients, body=body)
     mail.send(msg)

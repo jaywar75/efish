@@ -1,10 +1,14 @@
 # app/__init__.py
 
 from flask import Flask
-from .extensions import mongo, login_manager, mail, csrf, migrate, setup_logging
+from flask_wtf.csrf import CSRFProtect
+from .extensions import mongo, login_manager, mail, migrate, setup_logging
 from .blueprints.auth import auth_bp
 from .blueprints.errors import errors_bp, register_error_handlers
 from .blueprints.main import main_bp  # Import main Blueprint
+from .blueprints.user import user_bp
+
+csrf = CSRFProtect()
 
 def create_app(config_class):
     app = Flask(__name__)
@@ -22,6 +26,7 @@ def create_app(config_class):
 
     # Register Blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(main_bp)    # Register main Blueprint
     app.register_blueprint(errors_bp)  # Register Errors Blueprint
 

@@ -1,0 +1,21 @@
+<!-- user/view_profile.html -->
+{% extends "base.html" %}
+{% block title %}Your Profile{% endblock %}
+{% block content %}
+  <div class="container mt-4">
+    <h1>Profile Details</h1>
+
+    <!-- Now 'user' is the entire DB document, so you can show all fields -->
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>First Name:</strong> {{ user.first_name }}</p>
+    <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+    <p><strong>Phone:</strong> {{ user.phone }}</p>
+    <p><strong>Time Zone:</strong> {{ user.time_zone }}</p>
+    <p><strong>About Me:</strong> {{ user.about_me }}</p>
+    ...
+    <a href="{{ url_for('user.edit_profile') }}" class="btn btn-primary">
+      Edit Profile
+    </a>
+  </div>
+{% endblock %}

@@ -5,19 +5,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
 from app.extensions import mongo
 
+
+# app/models/user.py
 class User(UserMixin):
-    def __init__(self, user_dict):
-        self.id = str(user_dict['_id'])
-        self.username = user_dict['username']
-        self.email = user_dict['email']
-        self.password_hash = user_dict['password_hash']
-        # Add other fields as necessary
+    def __init__(self, user_doc):
+        self.id = str(user_doc["_id"])
+        self.username = user_doc.get("username", "")
+        self.email = user_doc.get("email", "")
+        self.password_hash = user_doc.get("password_hash", "")
+        # any other fields, e.g. first_name, etc.
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     @staticmethod
     def get(user_id):
-        user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
-        if user:
-            return User(user)
+        from bson import ObjectId
+        doc = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if doc:
+            return User(doc)
         return None
 
     @staticmethod
