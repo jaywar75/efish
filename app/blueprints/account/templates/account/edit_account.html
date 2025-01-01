@@ -1,0 +1,33 @@
+<!-- app/blueprints/account/templates/account/edit_account.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Account</h2>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <!-- Example: Edit account_name -->
+        <div class="mb-3">
+            {{ form.account_name.label(class="form-label") }}
+            {{ form.account_name(class="form-control") }}
+            {% for error in form.account_name.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Example: plan_type if you allow editing that -->
+        <div class="mb-3">
+            {{ form.plan_type.label(class="form-label") }}
+            {{ form.plan_type(class="form-control") }}
+            {% for error in form.plan_type.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Submit button -->
+        <div class="d-grid">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

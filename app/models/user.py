@@ -21,6 +21,9 @@ class User(UserMixin):
         self.time_zone = user_doc.get("time_zone", "")
         self.about_me = user_doc.get("about_me", "")
 
+        # Add account_id if you want each user to be tied to a single account
+        self.account_id = user_doc.get("account_id")
+
     def verify_password(self, password):
         """
         Returns True if the given plaintext `password` matches the stored hash.
@@ -74,3 +77,6 @@ class User(UserMixin):
             self.phone = user_doc.get("phone", "")
             self.time_zone = user_doc.get("time_zone", "")
             self.about_me = user_doc.get("about_me", "")
+
+            # Keep user object's account_id in sync with the database
+            self.account_id = user_doc.get("account_id")

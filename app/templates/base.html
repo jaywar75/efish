@@ -64,6 +64,13 @@
                           <i class="fas fa-edit"></i> Edit Profile
                         </a>
                       </li>
+                      <!-- Added "Account Management" item here -->
+                      <li>
+                        <a class="dropdown-item"
+                           href="{{ url_for('account.view_account', account_id=current_user.account_id) }}">
+                          <i class="fas fa-building"></i> Account Management
+                        </a>
+                      </li>
                       <li><hr class="dropdown-divider"></li>
                       <li>
                         <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">

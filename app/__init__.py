@@ -7,6 +7,7 @@ from .blueprints.auth import auth_bp
 from .blueprints.errors import errors_bp, register_error_handlers
 from .blueprints.main import main_bp
 from .blueprints.user import user_bp
+from .blueprints.account import account_bp
 
 csrf = CSRFProtect()
 
@@ -33,9 +34,10 @@ def create_app(config_class):
 
     # Register Blueprints
     app.register_blueprint(auth_bp)
-    app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(main_bp)
     app.register_blueprint(errors_bp)
+    app.register_blueprint(user_bp, url_prefix="/user")
+    app.register_blueprint(account_bp, url_prefix="/account")
 
     # Register Error Handlers
     register_error_handlers(app)

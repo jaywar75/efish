@@ -1,0 +1,22 @@
+<!-- app/blueprints/account/templates/account/view_account.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Account Details</h2>
+
+    <!-- Example fields: adjust names as needed -->
+    <p><strong>Account Name:</strong> {{ account.account_name }}</p>
+    <p><strong>Plan Type:</strong> {{ account.plan_type }}</p>
+    <p><strong>Created At:</strong> {{ account.created_at }}</p>
+    <!-- If you store tenant_id or account_number, show them here -->
+    {# <p><strong>Tenant ID:</strong> {{ account.tenant_id }}</p> #}
+    {# <p><strong>Account Number:</strong> {{ account.account_number }}</p> #}
+
+    <hr>
+    <!-- Link to edit this account if needed -->
+    <a href="{{ url_for('account.edit_account', account_id=account._id) }}"
+       class="btn btn-primary">
+       <i class="fas fa-edit"></i> Edit Account
+    </a>
+</div>
+{% endblock %}

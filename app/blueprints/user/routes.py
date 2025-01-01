@@ -4,8 +4,51 @@ from bson import ObjectId
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from . import user_bp
-from .forms import ViewProfileForm, EditProfileForm
-from ...extensions import mongo  # Adjust import path if your 'extensions' location differs
+from .forms import RegistrationForm, ViewProfileForm, EditProfileForm
+from ...extensions import mongo
+# Instead of 'create_user_and_assign_account', we import the multi-account function:
+from app.blueprints.services.user_service import create_user_with_account_option
+
+
+@user_bp.route("/register", methods=["GET", "POST"])
+def register():
+    """
+    A route for user registration that populates a dropdown of existing accounts
+    or allows the user to choose 'NEW', which creates a new account doc.
+    """
+
+    form = RegistrationForm()
+
+    # 1. Get existing accounts from DB
+    accounts_list = mongo.db.accounts.find({})  # or some filter if needed
+
+    # 2. Build choices: e.g. [("NEW", "Create New Account"), ("64fdbb...", "Acme Corp"), ...]
+    account_choices = [("NEW", "Create New Account")]  # default special choice
+    for acct in accounts_list:
+        # Use acct["account_name"] if you store a name, or fallback to str(_id)
+        label = acct.get("account_name", str(acct["_id"]))
+        account_choices.append((str(acct["_id"]), label))
+
+    # 3. Assign these to the form’s existing_acct_id choices
+    form.existing_acct_id.choices = account_choices
+
+    # 4. On form submit, handle user creation
+    if form.validate_on_submit():
+        # Grab the user’s chosen ID (or "NEW")
+        existing_acct_choice = form.existing_acct_id.data
+
+        new_user_id = create_user_with_account_option(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            password=form.password.data,
+            existing_acct_id=existing_acct_choice
+        )
+
+        flash("User registered!", "success")
+        return redirect(url_for("user.login"))
+
+    return render_template("user/register.html", form=form)
 
 
 @user_bp.route('/profile', methods=['GET'])
@@ -13,10 +56,10 @@ from ...extensions import mongo  # Adjust import path if your 'extensions' locat
 def view_profile():
     """
     Displays the currently logged-in user's profile in read-only mode.
-    We re-query Mongo to ensure we have the latest data, rather than relying
+    Re-queries Mongo to ensure we have the latest data, rather than relying
     on the potentially stale session object in current_user.
     """
-    user_id = current_user.get_id()  # or current_user._id if that's how you store it
+    user_id = current_user.get_id()
     user_doc = mongo.db.users.find_one({"_id": ObjectId(user_id)})
     if not user_doc:
         flash("User not found in the database.", "danger")
@@ -31,12 +74,7 @@ def view_profile():
     form.time_zone.data  = user_doc.get("time_zone", "")
     form.about_me.data   = user_doc.get("about_me", "")
 
-    # Pass the fresh user_doc & form to the template
-    return render_template(
-        "user/view_profile.html",
-        user=user_doc,
-        form=form
-    )
+    return render_template("user/view_profile.html", user=user_doc, form=form)
 
 
 @user_bp.route('/edit', methods=['GET', 'POST'])
@@ -64,7 +102,6 @@ def edit_profile():
         form.about_me.data   = user_doc.get("about_me", "")
 
     elif form.validate_on_submit():
-        # Collect updated data from the form
         updated_fields = {
             "email":      form.email.data,
             "first_name": form.first_name.data,
@@ -74,26 +111,15 @@ def edit_profile():
             "about_me":   form.about_me.data,
         }
 
-        # Update in Mongo
-        result = mongo.db.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": updated_fields}
-        )
+        result = mongo.db.users.update_one({"_id": ObjectId(user_id)}, {"$set": updated_fields})
 
         if result.modified_count > 0:
             flash("Profile updated successfully!", "success")
         else:
-            # Possibly the user made no changes, or the user was not found
             flash("No changes made or user not found.", "warning")
 
         return redirect(url_for("user.view_profile"))
     else:
-        # If POST but form validation failed:
         flash("Please correct the errors below.", "danger")
 
-    # Render the template with the form (and optionally user_doc)
-    return render_template(
-        "user/edit_profile.html",
-        form=form,
-        user=user_doc
-    )
+    return render_template("user/edit_profile.html", form=form, user=user_doc)

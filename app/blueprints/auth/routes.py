@@ -15,45 +15,63 @@ from flask_login import (
     logout_user,
     login_required
 )
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from werkzeug.security import generate_password_hash
+from flask_mail import Message
+
+# Existing blueprint import
 from app.blueprints.auth import auth_bp
+
+# Existing forms
 from app.blueprints.auth.forms import (
     RegistrationForm,
     LoginForm,
     RequestResetForm,
     ResetPasswordForm
 )
+
+# Newly added: to integrate existing account or "NEW" logic
+from app.blueprints.services.user_service import create_user_with_account_option
+
+# Existing imports
 from app.models.user import User
-from werkzeug.security import generate_password_hash
 from app.extensions import mongo, mail
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from flask_mail import Message
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     """
-    A basic registration route that:
-      - Collects first_name (and optionally last_name), email, and password.
-      - Inserts a new user document in MongoDB.
+    A registration route that:
+      - Provides a dropdown for selecting an existing account or creating a new account.
+      - Collects first_name, last_name, email, password.
+      - Inserts a new user doc referencing the chosen or newly created account in MongoDB.
       - Redirects to the login page on success.
     """
     if current_user.is_authenticated:
         return redirect(url_for("main.dashboard"))
 
     form = RegistrationForm()
-    if form.validate_on_submit():  # or if request.method == "POST" if no validators
-        # Hash the password
-        hashed_pw = generate_password_hash(form.password.data)
-        new_user = {
-            "first_name": form.first_name.data,
-            "last_name": form.last_name.data,   # if you capture this in the form
-            "email": form.email.data.lower(),
-            "password_hash": hashed_pw,
-        }
-        # Insert user into Mongo
-        mongo.db.users.insert_one(new_user)
 
-        flash("Registration successful! You can now log in.", "success")
+    # Query all existing accounts
+    accounts = mongo.db.accounts.find({})
+    # Build choices: the user can pick an existing account OR "NEW"
+    acct_choices = [("NEW", "Generate New Account")]
+    for acct in accounts:
+        label = acct.get("account_name", str(acct["_id"]))
+        acct_choices.append((str(acct["_id"]), label))
+
+    # Assign these to the dropdown
+    form.existing_acct_id.choices = acct_choices
+
+    if form.validate_on_submit():
+        new_user_id = create_user_with_account_option(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            password=form.password.data,
+            existing_acct_id=form.existing_acct_id.data  # "NEW" or a valid 24-hex ID
+        )
+        flash("User registered!", "success")
         return redirect(url_for("auth.login"))
 
     return render_template("register.html", form=form)
@@ -117,7 +135,7 @@ def reset_request():
             user_obj = User(user_doc)
             send_reset_email(user_obj)
 
-        # Security measure: do not reveal if the email doesn't exist
+        # For security, do not reveal if email doesn't exist
         flash("If the account exists, you will receive a password-reset email.", "info")
         return redirect(url_for("auth.login"))
 
@@ -134,7 +152,7 @@ def reset_password(token):
 
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     try:
-        # Token stores the user's email (or user ID).
+        # The token stores the user's email (or user ID).
         email = s.loads(token, max_age=1800)  # 30 min expiry
     except SignatureExpired:
         flash("Your reset link has expired. Please request a new one.", "warning")
@@ -177,8 +195,7 @@ def send_reset_email(user_obj):
     sender = current_app.config.get("MAIL_DEFAULT_SENDER", "no-reply@example.com")
     recipients = [user_obj.email]
 
-    # Use 'first_name' instead of 'username'. If your model stores first_name, do user_obj.first_name.
-    # If last_name is optional, you can combine them or just use first_name alone.
+    # If your user model has first_name:
     body = f"""\
 Hello {user_obj.first_name},
 
